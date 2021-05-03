@@ -15,14 +15,22 @@ public class Database {
 	/**
 	 * Modify it to fit your environment and then use this string when connecting to your database!
 	 */
-	private static final String jdbcString = "jdbc:mysql://localhost/krusty";
+	private static final String jdbcString = "jdbc:mysql://puccini.cs.lth.se:3306/db03";
 	private Connection conn = null;
 	// For use with MySQL or PostgreSQL
-	private static final String jdbcUsername = "<CHANGE ME>";
-	private static final String jdbcPassword = "<CHANGE ME>";
+	private static final String jdbcUsername = "db03";
+	private static final String jdbcPassword = "xra597jn";
 
 	public void connect() {
-		// Connect to database here
+		try{
+			conn = DriverManager.getConnection(
+					"jdbc:mysql://" + jdbcString, jdbcUsername, jdbcPassword
+			);
+		}catch (SQLException ex) {
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+		}
 	}
 
 	// TODO: Implement and change output in all methods below!
