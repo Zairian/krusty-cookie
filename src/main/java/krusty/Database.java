@@ -24,7 +24,7 @@ public class Database {
 	public void connect() {
 		try{
 			conn = DriverManager.getConnection(
-					"jdbc:mysql://" + jdbcString, jdbcUsername, jdbcPassword
+					jdbcString, jdbcUsername, jdbcPassword
 			);
 		}catch (SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());
