@@ -94,9 +94,36 @@ public class Database {
 	}
 
 	public String reset(Request req, Response res){
+
+		try{
+			Statement s = conn.createStatement();
+			String clearCustomers = "TRUNCATE TABLE Customers";
+			String clearOrders = "TRUNCATE TABLE Orders";
+			String clearPalletCounter = "TRUNCATE TABLE PalletCounter";
+			String clearPallets = "TRUNCATE TABLE Pallets";
+			String clearCookies = "TRUNCATE TABLE Cookies";
+			String clearIngredients = "TRUNCATE TABLE Ingredients";
+			String clearRecipes = "TRUNCATE TABLE Recipes";
+
+			s.addBatch(clearCustomers);
+			s.addBatch(clearOrders);
+			s.addBatch(clearPalletCounter);
+			s.addBatch(clearPallets);
+			s.addBatch(clearCookies);
+			s.addBatch(clearIngredients);
+			s.addBatch(clearRecipes);
+
+			s.executeBatch();
+
+		}catch(SQLException ex){
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+		}
+
 		String query = "";
 		try{
-			query = IOUtils.toString(new FileInputStream("./resources/public/create-schema.sql"));
+			query = IOUtils.toString(new FileInputStream("./resources/public/initial-data.sql"));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
