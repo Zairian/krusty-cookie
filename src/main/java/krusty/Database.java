@@ -97,21 +97,14 @@ public class Database {
 
 		try{
 			Statement s = conn.createStatement();
-			String clearCustomers = "TRUNCATE TABLE Customers";
-			String clearOrders = "TRUNCATE TABLE Orders";
-			String clearPalletCounter = "TRUNCATE TABLE PalletCounter";
-			String clearPallets = "TRUNCATE TABLE Pallets";
-			String clearCookies = "TRUNCATE TABLE Cookies";
-			String clearIngredients = "TRUNCATE TABLE Ingredients";
-			String clearRecipes = "TRUNCATE TABLE Recipes";
 
-			s.addBatch(clearCustomers);
-			s.addBatch(clearOrders);
-			s.addBatch(clearPalletCounter);
-			s.addBatch(clearPallets);
-			s.addBatch(clearCookies);
-			s.addBatch(clearIngredients);
-			s.addBatch(clearRecipes);
+			s.addBatch("TRUNCATE TABLE Customers");
+			s.addBatch("TRUNCATE TABLE Orders");
+			s.addBatch("TRUNCATE TABLE PalletCounter");
+			s.addBatch("TRUNCATE TABLE Pallets");
+			s.addBatch("TRUNCATE TABLE Cookies");
+			s.addBatch("TRUNCATE TABLE Ingredients");
+			s.addBatch("TRUNCATE TABLE Recipes");
 
 			s.executeBatch();
 
@@ -139,7 +132,5 @@ public class Database {
 		return "";
 	}
 
-	public String createPallet(Request req, Response res) {
-		return "{}";
-	}
+	public String createPallet(Request req, Response res) { return "{}"; }
 }
