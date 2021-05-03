@@ -3,6 +3,8 @@ package krusty;
 import spark.Request;
 import spark.Response;
 
+import java.sql.*;
+import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,7 +16,7 @@ public class Database {
 	 * Modify it to fit your environment and then use this string when connecting to your database!
 	 */
 	private static final String jdbcString = "jdbc:mysql://localhost/krusty";
-
+	private Connection conn = null;
 	// For use with MySQL or PostgreSQL
 	private static final String jdbcUsername = "<CHANGE ME>";
 	private static final String jdbcPassword = "<CHANGE ME>";
@@ -26,7 +28,14 @@ public class Database {
 	// TODO: Implement and change output in all methods below!
 
 	public String getCustomers(Request req, Response res) {
-		return "{}";
+		String sql = "SELECT name, address FROM Customer";
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			ResultSet rs = ps.executeQuery();
+			return Jsonizer.toJson(rs, "customers");
+		} catch(SQLException e){
+			e.printStackTrace();
+			return "0";
+		}
 	}
 
 	public String getRawMaterials(Request req, Response res) {
