@@ -49,7 +49,7 @@ public class Database {
 
 	public String getRawMaterials(Request req, Response res) {
 
-		String sql = "SELECT ingType AS name, amount FROM Ingredients";
+		String sql = "SELECT ingType AS name, amount, unit FROM Ingredients";
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
 			ResultSet rs = ps.executeQuery();
 			return Jsonizer.toJson(rs,"raw-materials");
