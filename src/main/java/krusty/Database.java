@@ -3,6 +3,7 @@ package krusty;
 import spark.Request;
 import spark.Response;
 
+import javax.xml.transform.Result;
 import java.sql.*;
 import java.sql.PreparedStatement;
 import java.util.Arrays;
@@ -47,7 +48,16 @@ public class Database {
 	}
 
 	public String getRawMaterials(Request req, Response res) {
-		return "{}";
+
+		String sql = "SELECT ingType AS name, amount FROM Ingredients";
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ResultSet rs = ps.executeQuery();
+			return Jsonizer.toJson(rs,"raw-materials");
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+
+		return "0";
 	}
 
 	public String getCookies(Request req, Response res) {
