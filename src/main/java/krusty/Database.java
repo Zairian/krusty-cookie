@@ -35,6 +35,7 @@ public class Database {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
+
 		}
 	}
 
@@ -128,46 +129,33 @@ public class Database {
 			System.out.println("SQLException: " + e.getMessage());
 			System.out.println("SQLState: " + e.getSQLState());
 			System.out.println("VendorError: " + e.getErrorCode());
-			return "0";
+			
 		}
+		return "ok";
 	}
 
 	public String reset(Request req, Response res){
-
+		String createSchema = null;
+		String initialData = null;
 		try{
-			Statement s = conn.createStatement();
-
-			s.addBatch("TRUNCATE TABLE Customers");
-			s.addBatch("TRUNCATE TABLE Orders");
-			s.addBatch("TRUNCATE TABLE PalletCounter");
-			s.addBatch("TRUNCATE TABLE Pallets");
-			s.addBatch("TRUNCATE TABLE Cookies");
-			s.addBatch("TRUNCATE TABLE Ingredients");
-			s.addBatch("TRUNCATE TABLE Recipes");
-
-			s.executeBatch();
-
-		}catch(SQLException ex){
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
-		}
-		String query = "";
-		try{
-			query = IOUtils.toString(new FileInputStream("src/main/resources/public/initial-data.sql"));
+			createSchema = IOUtils.toString(new FileInputStream("src/main/resources/public/create-schema.sql"));
+			initialData = IOUtils.toString(new FileInputStream("src/main/resources/public/initial-data.sql"));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 
-		try(PreparedStatement ps = conn.prepareStatement(query);){
-				ps.execute();
+		try{
+			PreparedStatement ps = conn.prepareStatement(createSchema);
+			ps.execute();
+			ps = conn.prepareStatement(initialData);
+			ps.execute();
 		}catch(SQLException ex){
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
 		}
 
-		return "";
+		return anythingToJson("ok", "status");
 	}
 
 	public String createPallet(Request req, Response res) {
@@ -210,5 +198,6 @@ public class Database {
 				return anythingToJson("error", "status");
 			}
 		}
+		return "0";
 	}
 }
