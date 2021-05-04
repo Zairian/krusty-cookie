@@ -94,29 +94,31 @@ public class Database {
 
 	public String getPallets(Request req, Response res) {
 
-		String sql = "SELECT palletLabel AS id, cookie, packingDate AS production_date, Orders.customer, blocked" +
-				"FROM Pallets INNER JOIN Orders ON Pallets.palletLabel = Orders.palletLabel" +
-				"ORDER BY production_date DESC";
+		String sql = "SELECT Pallets.palletLabel AS id, cookie, packingDate AS production_date, Orders.customer, blocked" +
+				" FROM Pallets LEFT OUTER JOIN Orders ON Pallets.palletLabel = Orders.palletLabel" +
+				" ORDER BY production_date DESC";
 
 		ArrayList<String> queryValues = new ArrayList<>();
 
-		String producedAfterDate = req.queryParams("from");
-		String producedBeforeDate = req.queryParams("to");
-		String selectCookie = req.queryParams("cookie");
-		String isBlocked = req.queryParams("blocked");
-
-		if(producedAfterDate != null){
+		//Produced after date
+		if(req.queryParams("from") != null){
 			sql += "WHERE production_date > ?";
-			queryValues.add(producedAfterDate);
-		}if(producedBeforeDate != null){
+			queryValues.add(req.queryParams("from"));
+		}
+		//Produced before date
+		if(req.queryParams("to") != null){
 			sql += "WHERE production_date < ?";
-			queryValues.add(producedBeforeDate);
-		}if(selectCookie != null){
+			queryValues.add(req.queryParams("to"));
+		}
+		//Selected cookie
+		if(req.queryParams("cookie") != null){
 			sql += "WHERE cookie = ?";
-			queryValues.add(selectCookie);
-		}if(isBlocked != null){
+			queryValues.add(req.queryParams("cookie"));
+		}
+		//Blocked pallets
+		if(req.queryParams("blocked") != null){
 			sql += "WHERE blocked = ?";
-			queryValues.add(isBlocked);
+			queryValues.add(req.queryParams("blocked"));
 		}
 
 		try(PreparedStatement ps = conn.prepareStatement(sql)){
@@ -131,7 +133,8 @@ public class Database {
 			System.out.println("VendorError: " + e.getErrorCode());
 			
 		}
-		return "ok";
+
+		return anythingToJson("error", "status");
 	}
 
 	public String reset(Request req, Response res){
@@ -198,6 +201,5 @@ public class Database {
 				return anythingToJson("error", "status");
 			}
 		}
-		return "0";
 	}
 }
