@@ -7,6 +7,7 @@ import javax.xml.transform.Result;
 import java.io.*;
 import java.sql.*;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
@@ -90,7 +91,44 @@ public class Database {
 	}
 
 	public String getPallets(Request req, Response res) {
-		return "{\"pallets\":[]}";
+
+		String sql = "SELECT palletLabel AS id, cookie, packingDate AS production_date, Orders.customer, blocked" +
+				"FROM Pallets INNER JOIN Orders ON Pallets.palletLabel = Orders.palletLabel" +
+				"ORDER BY production_date DESC";
+
+		ArrayList<String> queryValues = new ArrayList<>();
+
+		String producedAfterDate = req.queryParams("from");
+		String producedBeforeDate = req.queryParams("to");
+		String selectCookie = req.queryParams("cookie");
+		String isBlocked = req.queryParams("blocked");
+
+		if(producedAfterDate != null){
+			sql += "WHERE production_date > ?";
+			queryValues.add(producedAfterDate);
+		}if(producedBeforeDate != null){
+			sql += "WHERE production_date < ?";
+			queryValues.add(producedBeforeDate);
+		}if(selectCookie != null){
+			sql += "WHERE cookie = ?";
+			queryValues.add(selectCookie);
+		}if(isBlocked != null){
+			sql += "WHERE blocked = ?";
+			queryValues.add(isBlocked);
+		}
+
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			for(int i = 0; i < queryValues.size(); i++){
+				ps.setString(i + 1, queryValues.get(i));
+			}
+			ResultSet rs = ps.executeQuery();
+			return Jsonizer.toJson(rs, "pallets");
+		} catch(SQLException e){
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+			return "0";
+		}
 	}
 
 	public String reset(Request req, Response res){
