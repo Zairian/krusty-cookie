@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static krusty.Jsonizer.anythingToJson;
 import static krusty.Jsonizer.toJson;
 import spark.utils.IOUtils;
 
@@ -174,28 +175,33 @@ public class Database {
 			String cookie = req.queryParams("cookie");
 			return  createPallet(cookie);
 		} else{
-
+			return anythingToJson("unknown cookie", "status");
 		}
-
-
-
 	}
 
 	protected String createPallet(String cookie){
-		String sqlInsert = "INSERT INTO Pallets (cookie, curLoc, packingDate, blocked) values(?, 'Factory', CURDATE(), false)";
-		String sqlIngredients = "UPDATE Ingredients INNER JOIN Recipes ON Ingredients.ingType = Recipes.ingType SET Ingredients.amount = Ingredients.amount - (54*Recipes.amount) WHERE cookie = ?";
 		try{
+			String sqlInsert = "INSERT INTO Pallets (cookie, curLoc, packingDate, blocked) values(?, 'Factory', CURDATE(), false)";
 			PreparedStatement ps = conn.prepareStatement(sqlInsert);
 			ps.setString(1, cookie);
 			ps.execute();
 
+			String sqlIdentity = "SELECT LAST_INSERT_ID()";
+			ps = conn.prepareStatement(sqlIdentity);
+			ResultSet rs = ps.executeQuery();
+
+			String sqlIngredients = "UPDATE Ingredients INNER JOIN Recipes ON Ingredients.ingType = Recipes.ingType SET Ingredients.amount = Ingredients.amount - (54*Recipes.amount) WHERE cookie = ?";
 			ps = conn.prepareStatement(sqlIngredients);
 			ps.setString(1, cookie);
 			ps.execute();
-		}catch(SQLException ex){
+
+			return anythingToJson("ok", "status") + toJson(rs, "id");
+		}catch(SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
+
+			return anythingToJson("error", "status");
 		}
 	}
 }
