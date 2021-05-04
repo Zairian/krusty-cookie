@@ -124,9 +124,9 @@ public class Database {
 			ResultSet rs = ps.executeQuery();
 			return Jsonizer.toJson(rs, "pallets");
 		} catch(SQLException e){
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
+			System.out.println("SQLException: " + e.getMessage());
+			System.out.println("SQLState: " + e.getSQLState());
+			System.out.println("VendorError: " + e.getErrorCode());
 			return "0";
 		}
 	}
@@ -151,10 +151,9 @@ public class Database {
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
 		}
-
 		String query = "";
 		try{
-			query = IOUtils.toString(new FileInputStream("./resources/public/initial-data.sql"));
+			query = IOUtils.toString(new FileInputStream("src/main/resources/public/initial-data.sql"));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
