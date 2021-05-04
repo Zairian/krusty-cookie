@@ -197,11 +197,18 @@ public class Database {
 
 			return anythingToJson("ok", "status") + toJson(rs, "id");
 		}catch(SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
+			if(ex.getSQLState().startsWith("23")){
+				System.out.println("SQLException: " + ex.getMessage());
+				System.out.println("SQLState: " + ex.getSQLState());
+				System.out.println("VendorError: " + ex.getErrorCode());
+				return anythingToJson("unknown cookie", "status");
+			} else{
+				System.out.println("SQLException: " + ex.getMessage());
+				System.out.println("SQLState: " + ex.getSQLState());
+				System.out.println("VendorError: " + ex.getErrorCode());
 
-			return anythingToJson("error", "status");
+				return anythingToJson("error", "status");
+			}
 		}
 	}
 }
