@@ -94,7 +94,7 @@ public class Database {
 
 	public String getPallets(Request req, Response res) {
 
-		String sql = "SELECT Pallets.palletLabel AS id, cookie, packingDate AS production_date, Orders.customer, blocked" +
+		String sql = "SELECT Pallets.palletLabel AS id, cookie, packingDate AS production_date, Orders.customer, IF(blocked, 'yes', 'no')" +
 				" FROM Pallets LEFT OUTER JOIN Orders ON Pallets.palletLabel = Orders.palletLabel" +
 				" ORDER BY production_date DESC";
 
@@ -138,7 +138,6 @@ public class Database {
 	}
 
 	public String reset(Request req, Response res){
-		String createSchema = null;
 		String initialData = null;
 		try{
 			Statement s = conn.createStatement();
