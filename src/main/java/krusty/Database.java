@@ -138,16 +138,24 @@ public class Database {
 		String createSchema = null;
 		String initialData = null;
 		try{
-			createSchema = IOUtils.toString(new FileInputStream("src/main/resources/public/create-schema.sql"));
+			Statement s = conn.createStatement();
+			s.addBatch("set foreign_key_checks = 0;");
+			s.addBatch("TRUNCATE TABLE Recipes");
+			s.addBatch("TRUNCATE TABLE Ingredients");
+			s.addBatch("TRUNCATE TABLE Cookies");
+			s.addBatch("TRUNCATE TABLE Pallets");
+			s.addBatch("TRUNCATE TABLE PalletCounter");
+			s.addBatch("TRUNCATE TABLE Orders");
+			s.addBatch("TRUNCATE TABLE Customers");
+			s.addBatch("set foreign_key_checks = 1;");
+			s.executeBatch();
+
 			initialData = IOUtils.toString(new FileInputStream("src/main/resources/public/initial-data.sql"));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-
 		try{
-			PreparedStatement ps = conn.prepareStatement(createSchema);
-			ps.execute();
-			ps = conn.prepareStatement(initialData);
+			PreparedStatement ps = conn.prepareStatement(initialData);
 			ps.execute();
 		}catch(SQLException ex){
 			System.out.println("SQLException: " + ex.getMessage());
