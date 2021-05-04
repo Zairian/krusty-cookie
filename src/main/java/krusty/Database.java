@@ -132,5 +132,33 @@ public class Database {
 		return "";
 	}
 
-	public String createPallet(Request req, Response res) { return "{}"; }
+	public String createPallet(Request req, Response res) {
+		if(req.queryParams("cookie") != null){
+			String cookie = req.queryParams("cookie");
+			return  createPallet(cookie);
+		} else{
+
+		}
+
+
+
+	}
+
+	protected String createPallet(String cookie){
+		String sqlInsert = "INSERT INTO Pallets (cookie, curLoc, packingDate, blocked) values(?, 'Factory', CURDATE(), false)";
+		String sqlIngredients = "UPDATE Ingredients INNER JOIN Recipes ON Ingredients.ingType = Recipes.ingType SET Ingredients.amount = Ingredients.amount - (54*Recipes.amount) WHERE cookie = ?";
+		try{
+			PreparedStatement ps = conn.prepareStatement(sqlInsert);
+			ps.setString(1, cookie);
+			ps.execute();
+
+			ps = conn.prepareStatement(sqlIngredients);
+			ps.setString(1, cookie);
+			ps.execute();
+		}catch(SQLException ex){
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+		}
+	}
 }
