@@ -27,7 +27,7 @@ FOREIGN KEY (palletLabel) references Pallets (palletLabel)
 
 
 CREATE TABLE Pallets
-(palletLabel INT,
+(palletLabel INT auto_increment,
 cookie varchar(20),
 curLoc varchar(30),
 packingDate datetime,
