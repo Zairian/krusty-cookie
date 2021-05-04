@@ -102,4 +102,11 @@ insert into Recipes values ('Tango', 'Sodium bicarbonate', 4);
 insert into Recipes values ('Tango', 'Sugar', 250);
 insert into Recipes values ('Tango', 'Vanilla', 2);
 
-TRUNCATE TABLE Pallets;
+
+
+
+
+
+
+
+
