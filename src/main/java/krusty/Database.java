@@ -101,9 +101,8 @@ public class Database {
 
 	public String getPallets(Request req, Response res) {
 
-		String sql = "SELECT Pallets.palletLabel AS id, cookie, packingDate AS production_date, Orders.customer, IF(blocked, 'yes', 'no')" +
-				" FROM Pallets LEFT OUTER JOIN Orders ON Pallets.palletLabel = Orders.palletLabel" +
-				" ORDER BY production_date DESC";
+		String sql = "SELECT Pallets.palletLabel AS id, cookie, packingDate AS production_date, Orders.customer, IF(blocked, 'yes', 'no') AS blocked" +
+				" FROM Pallets LEFT OUTER JOIN Orders ON Pallets.palletLabel = Orders.palletLabel ";
 
 		ArrayList<String> queryValues = new ArrayList<>();
 
@@ -143,7 +142,7 @@ public class Database {
 			}
 			queryValues.add(req.queryParams("blocked"));
 		}
-
+		sql += "ORDER BY packingDate DESC";
 		try(PreparedStatement ps = conn.prepareStatement(sql)){
 			for(int i = 0; i < queryValues.size(); i++){
 				ps.setString(i + 1, queryValues.get(i));
@@ -164,7 +163,7 @@ public class Database {
 		String initialData = null;
 		try{
 			Statement s = conn.createStatement();
-			s.addBatch("set foreign_key_checks = 0;");
+			s.addBatch("set foreign_key_checks = 0");
 			s.addBatch("TRUNCATE TABLE Recipes");
 			s.addBatch("TRUNCATE TABLE Ingredients");
 			s.addBatch("TRUNCATE TABLE Cookies");
