@@ -213,16 +213,21 @@ public class Database {
 			ps.setString(1, cookie);
 			ps.execute();
 
-			String sqlIdentity = "SELECT LAST_INSERT_ID()";
+			String sqlIdentity = "SELECT LAST_INSERT_ID() AS last_id";
 			ps = conn.prepareStatement(sqlIdentity);
 			ResultSet rs = ps.executeQuery();
+			String id = null;
+			if(rs.next()){
+				id = rs.getString(1);
+			}
 
 			String sqlIngredients = "UPDATE Ingredients INNER JOIN Recipes ON Ingredients.ingType = Recipes.ingType SET Ingredients.amount = Ingredients.amount - (54*Recipes.amount) WHERE cookie = ?";
 			ps = conn.prepareStatement(sqlIngredients);
 			ps.setString(1, cookie);
 			ps.execute();
 
-			return anythingToJson("ok", "status") + toJson(rs, "id");
+			return "{\"status\": \"ok\",\"id\": " + id + "}";
+
 		}catch(SQLException ex) {
 			if(ex.getSQLState().startsWith("23")){
 				System.out.println("SQLException: " + ex.getMessage());
