@@ -1,4 +1,4 @@
-insert into Customers values("Bjudkakor AB", 'Ystad');
+insert into Customers values('Bjudkakor AB', 'Ystad');
 
 insert into Customers values('Finkakor AB', 'Helsingborg');
 

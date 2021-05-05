@@ -20,7 +20,7 @@ public class Database {
 	/**
 	 * Modify it to fit your environment and then use this string when connecting to your database!
 	 */
-	private static final String jdbcString = "jdbc:mysql://puccini.cs.lth.se:3306/db03";
+	private static final String jdbcString = "jdbc:mysql://puccini.cs.lth.se:3306/db03?rewriteBatchedStatements=true&allowMultiQueries=true";
 	private Connection conn = null;
 	// For use with MySQL or PostgreSQL
 	private static final String jdbcUsername = "db03";
@@ -47,8 +47,10 @@ public class Database {
 			ResultSet rs = ps.executeQuery();
 			return Jsonizer.toJson(rs, "customers");
 		} catch(SQLException e){
-			e.printStackTrace();
-			return "0";
+			System.out.println("SQLException: " + e.getMessage());
+			System.out.println("SQLState: " + e.getSQLState());
+			System.out.println("VorError: " + e.getErrorCode());
+			return anythingToJson("error", "status");
 		}
 	}
 
@@ -59,10 +61,11 @@ public class Database {
 			ResultSet rs = ps.executeQuery();
 			return Jsonizer.toJson(rs,"raw-materials");
 		} catch(SQLException e) {
-			e.printStackTrace();
+			System.out.println("SQLException: " + e.getMessage());
+			System.out.println("SQLState: " + e.getSQLState());
+			System.out.println("VorError: " + e.getErrorCode());
+			return anythingToJson("error", "status");
 		}
-
-		return "0";
 	}
 
 	public String getCookies(Request req, Response res) {
@@ -72,8 +75,10 @@ public class Database {
 			ResultSet rs = ps.executeQuery();
 			return Jsonizer.toJson(rs, "cookies");
 		} catch(SQLException e){
-			e.printStackTrace();
-			return "0";
+			System.out.println("SQLException: " + e.getMessage());
+			System.out.println("SQLState: " + e.getSQLState());
+			System.out.println("VorError: " + e.getErrorCode());
+			return anythingToJson("error", "status");
 		}
 	}
 
@@ -87,8 +92,10 @@ public class Database {
 			ResultSet rs = ps.executeQuery();
 			return Jsonizer.toJson(rs, "recipes");
 		} catch(SQLException e){
-			e.printStackTrace();
-			return "0";
+			System.out.println("SQLException: " + e.getMessage());
+			System.out.println("SQLState: " + e.getSQLState());
+			System.out.println("VorError: " + e.getErrorCode());
+			return anythingToJson("error", "status");
 		}
 	}
 
@@ -102,22 +109,38 @@ public class Database {
 
 		//Produced after date
 		if(req.queryParams("from") != null){
-			sql += "WHERE production_date > ?";
+			if(!queryValues.isEmpty()){
+				sql += "AND packingDate > ? ";
+			} else{
+				sql += "WHERE packingDate > ? ";
+			}
 			queryValues.add(req.queryParams("from"));
 		}
 		//Produced before date
 		if(req.queryParams("to") != null){
-			sql += "WHERE production_date < ?";
+			if(!queryValues.isEmpty()){
+				sql += "AND packingDate < ? ";
+			} else{
+				sql += "WHERE packingDate < ? ";
+			}
 			queryValues.add(req.queryParams("to"));
 		}
 		//Selected cookie
 		if(req.queryParams("cookie") != null){
-			sql += "WHERE cookie = ?";
+			if(!queryValues.isEmpty()){
+				sql += "AND cookie = ? ";
+			} else{
+				sql += "WHERE cookie = ? ";
+			}
 			queryValues.add(req.queryParams("cookie"));
 		}
 		//Blocked pallets
 		if(req.queryParams("blocked") != null){
-			sql += "WHERE blocked = ?";
+			if(!queryValues.isEmpty()){
+				sql += "AND IF(blocked, 'yes', 'no') = ? ";
+			} else{
+				sql += "WHERE IF(blocked, 'yes', 'no') = ? ";
+			}
 			queryValues.add(req.queryParams("blocked"));
 		}
 
@@ -149,14 +172,21 @@ public class Database {
 			s.addBatch("TRUNCATE TABLE PalletCounter");
 			s.addBatch("TRUNCATE TABLE Orders");
 			s.addBatch("TRUNCATE TABLE Customers");
-			s.addBatch("set foreign_key_checks = 1;");
+			s.addBatch("set foreign_key_checks = 1");
 			s.executeBatch();
 
-			initialData = IOUtils.toString(new FileInputStream("src/main/resources/public/initial-data.sql"));
-		}catch(Exception e){
-			e.printStackTrace();
+		}catch(SQLException ex){
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
 		}
 		try{
+			initialData = IOUtils.toString(new FileInputStream("src/main/resources/public/initial-data.sql"));
+		} catch(Exception ex){
+			ex.printStackTrace();
+		}
+		try{
+
 			PreparedStatement ps = conn.prepareStatement(initialData);
 			ps.execute();
 		}catch(SQLException ex){
@@ -169,17 +199,17 @@ public class Database {
 	}
 
 	public String createPallet(Request req, Response res) {
-		if(req.queryParams("cookie") != null){
+		if (req.queryParams("cookie") != null) {
 			String cookie = req.queryParams("cookie");
-			return  createPallet(cookie);
-		} else{
-			return anythingToJson("unknown cookie", "status");
+			return createPallet(cookie);
+		} else {
+			return anythingToJson("error", "status");
 		}
 	}
 
 	protected String createPallet(String cookie){
 		try{
-			String sqlInsert = "INSERT INTO Pallets (cookie, curLoc, packingDate, blocked) values(?, 'Factory', CURDATE(), false)";
+			String sqlInsert = "INSERT INTO Pallets (cookie, curLoc, packingDate, blocked) values(?, 'Factory', NOW(), false)";
 			PreparedStatement ps = conn.prepareStatement(sqlInsert);
 			ps.setString(1, cookie);
 			ps.execute();
